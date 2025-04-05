@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Alejandro and Kamila</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="potentiometro.css"/>
+  <link rel="stylesheet" href="bulb.css"/>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard">
+    <div class="wrapper">
+      <div class="light">
+        <div class="bulb">
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+    <form class="knob-group" lang="en" novalidate spellcheck="false">
+      <fieldset class="knob">
+        <input type="number" id="t" value="20" min="1" max="100" step="1" placeholder="-" autocomplete="off" required/>
+        <label for="t" accesskey="t">TEMP</label>
+        <i data-min="1" data-max="100" aria-hidden="true"></i>
+      </fieldset>
+      <fieldset class="knob">
+        <input type="number" id="u" value="40" min="1" max="120" step="1" placeholder="-" autocomplete="off" required/>
+        <label for="u" accesskey="u">HUM</label>
+        <i data-min="1" data-max="120" aria-hidden="true"></i>
+      </fieldset>
+    </form>
+    <div class="status-indicator">
+      <div class="status-dot active"></div>
+      <div class="status-text">Conectado</div>
+    </div>
+  </div>
+  <div class="graficaContainer">
+    <canvas id="Grafica"></canvas>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/particle-api-js@8/dist/particle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src=" https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js "></script>
+<script src="potentiometro.js"></script>
+<script src="grafica.js"></script>
+<script type="text/javascript">
+  const USER = "user@gmail.com";
+  const PASS = "password";
+  const DEVICE_ID = "device_id_1234567890";
+  const INPUT_DELAY = 500;
+
+  let token;
+
+  let $Temp = $('#t')[0];
+  let $Hum = $('#u')[0];
+  let $PhotonIndicator = $('.status-dot')[0];
+
+  let particle = new Particle();
+
+  function photonIsOnline(active) {
+    if (active) {
+      $PhotonIndicator.classList.add('active');
+      $PhotonIndicator.classList.remove('inactive');
+      $('.status-text').text("Conectado");
+    } else {
+      $PhotonIndicator.classList.remove('active');
+      $PhotonIndicator.classList.add('inactive');
+      $('.status-text').text("Desconectado");
+    }
+  }
+
+  function debounce(func, delay) {
+    let timeout;
+    return function executedFunction(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  }
+  
+  async function setData(name, deviceId, value, token) {
+    try {
+      const response = await particle.callFunction({
+        deviceId: deviceId,
+        name: name,
+        argument: value,
+        auth: token
+      });
+      return response;
+    } catch (error) {
+      console.error(`Error setting ${name} to ${value}:`, error);
+      throw error;
+    }
+  }
+
+  function observeDevice(intervalSec, user, pass, deviceId) {
+    setInterval(async () => {
+      try {
+        const response = await particle.getDevice({ deviceId, auth: token });
+        photonIsOnline(response.body.connected);
+      } catch (err) {
+        console.error("Error checking device:", err);
+        photonIsOnline(false);
+      }
+    }, intervalSec * 1000);
+  }
+
+
+  async function start() {
+    try {
+      let loginResponse = await particle.login({ username: USER, password: PASS });
+      token = loginResponse.body.access_token;
+      
+      $Temp.oninput = debounce((e) => {
+        console.log(e.target.value + "setMaxTemp");
+        setData('setMaxTemp', DEVICE_ID, e.target.value, token);
+      }, INPUT_DELAY);
+      $Hum.oninput = debounce((e) => {
+        console.log(e.target.value + "setMaxHum");
+        setData('setMaxHum', DEVICE_ID, e.target.value, token);
+      }, INPUT_DELAY);
+
+      observePhoton(5, USER, PASS, DEVICE_ID);
+    } catch (error) {
+      console.error("Error starting web app:", error);
+    }
+  }
+
+  observeDevice(5, USER, PASS, DEVICE_ID);
+  start();
+</script>
+</body>
+</html>
+

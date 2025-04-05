@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Form Alejandro</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Alejandro Jeronimo Azamar">
+  <style> 
+  #Temperatura {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+
+    &:before {
+      content: "Temperatura";
+    }
+  }
+  #Humedad {
+    position: absolute;
+    top: 40px;
+    left: 150px;
+
+    &:before {
+      content: "Humedad";
+    }
+  }
+  #Intervalo {
+    position: absolute;
+    top: -10px;
+    left: calc(100% - 150px);
+  }
+  #Humedad:before, #Temperatura:before {
+    position: relative;
+    top: -25px;
+    right: -50%;
+  }
+  </style>
+</head>
+<body>
+    <span id="Temperatura">??? </span>
+    <span id="Humedad">??? </span>
+    <div>
+      <canvas id="Grafica"></canvas>
+    </div>
+
+    <div id="Intervalo">
+      <p>Intervalo</p>
+      <input type="number" value="5" min="1" max="100">
+    </div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/particle-api-js@10/dist/particle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src=" https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js "></script>
+<script>
+    var $Temp = $('#Temperatura'); // asignamos el objeto Temperatura a una variable nueva
+    var $Hum= $('#Humedad'); // asignamos el objeto Humedad a una variable nueva
+    var $Int= $('#Intervalo input');
+    var temp=0;
+    var hum=0;
+    
+    // Arrays que van a contener los valores de temp y hum
+    let tempData = [];
+    let humData = [];
+
+    // Constante sobre que tan grande sera la grafica
+    const DATASIZE = 50;
+    // Declaracion de variables usadas por Chart
+    const labels = Array(DATASIZE).fill(1).map((n, i) => n + i)
+    const data = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Temperatura',
+          data: tempData,
+        },
+        {
+          label: 'Humedad',
+          data: humData,
+        }
+      ]
+    };
+    const config = {
+      type: 'line',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Datos de DTH11 Enviados por Photon'
+          }
+        }
+      },
+    };
+    const $Ctx = $('#Grafica');
+    const chart = new Chart($Ctx, config);
+
+    var particle = new Particle();
+    var token;
+
+    particle.login({
+      username: 'user@gmail.com', 
+      password: 'password'
+    }).then(
+      function(data) {
+        token = data.body.access_token;
+      },
+      function (err) {
+        console.log('Could not log in.', err);
+      }
+    );
+
+    var intervalFunc;
+    
+    function observePhoton (interval) {
+      if (intervalFunc) {
+        clearInterval(intervalFunc);
+      }
+      intervalFunc = setInterval(function() {
+        particle.getVariable({ 
+          deviceId: 'device_id_1234567890', 
+          name: 'TEMP', 
+          auth:token 
+        }).then(function(data) {
+            console.log('Device variable retrieved successfully', data);
+            temp=data.body.result;
+          }, function(err) {
+              console.log('An error occurred while getting attrs', err);
+            });
+        particle.getVariable({
+          deviceId: 'device_id_1234567890',
+          name: 'HUM',
+          auth: token
+        }).then(function(data) {
+            console.log('Device variable retrieved successfully', data);
+            hum=data.body.result;
+          }, function(err) {
+              console.log('An error occurred while getting attrs', err);
+            });
+
+        Hum = hum.toFixed(2);
+        Temp = temp.toFixed(2);
+
+        // Mete los datos del DHT11 a los arrays correspondientes
+        humData.push(hum);
+        tempData.push(temp);
+
+        // Si hay mas de 100 datos en los arrays, elimina el primero (el dato mas viejo)
+        if (humData.length > DATASIZE) humData.shift()
+        if (tempData.length > DATASIZE) tempData.shift()
+
+        chart.update()
+
+        $Hum.text(Hum+"%");
+        $Temp.text(Temp+"°C");
+      },interval * 1000);
+    }
+
+    $Int.on('input', function() {
+      var newInterval = $(this).val();
+      if (newInterval >= 1 && newInterval <= 100) {
+        observePhoton(newInterval);
+      }
+    });
+</script>
+</body>
+</html>
+
+

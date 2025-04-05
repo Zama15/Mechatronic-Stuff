@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Form Alejandro</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Alejandro Jeronimo Azamar">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style> 
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+    }
+    .container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        img {
+          width: 20rem;
+          height: auto;
+        }
+    }
+    .cooldownContainer {
+        display: flex;
+        position: absolute;
+        left: 355px;
+        top: 200px;
+    }
+    .switchs-container {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+        position: relative;
+        top: 96px;
+        left: -10px;
+    }
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    #pinState0, #pinState1, #pinState2,
+    #pinState3, #pinState4, #pinState5,
+    #pinState6, #pinState7 {
+        position: relative;
+        top: calc(50% - 8px);
+        right: -100%;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+  </style>
+</head>
+<body>
+<div class="cooldownContainer">
+  <p>Cooldown: </p>
+  <p id="cooldown">OFF</p>
+</div>
+<div class="container">
+    <img src="photonImg.png" alt="Photon Card" width="300">
+    <div class="switchs-container">
+      <label class="switch" id="D7">
+          <input type="checkbox" id="toggleSwitch7">
+          <span class="slider"></span>
+          <span id="pinState7">OFF</span>
+      </label>
+      <label class="switch" id="D6">
+          <input type="checkbox" id="toggleSwitch6">
+          <span class="slider"></span>
+          <span id="pinState6">OFF</span>
+      </label>
+      <label class="switch" id="D5">
+          <input type="checkbox" id="toggleSwitch5">
+          <span class="slider"></span>
+          <span id="pinState5">OFF</span>
+      </label>
+      <label class="switch" id="D4">
+          <input type="checkbox" id="toggleSwitch4">
+          <span class="slider"></span>
+          <span id="pinState4">OFF</span>
+      </label>
+      <label class="switch" id="D3">
+          <input type="checkbox" id="toggleSwitch3">
+          <span class="slider"></span>
+          <span id="pinState3">OFF</span>
+      </label>
+      <label class="switch" id="D2">
+          <input type="checkbox" id="toggleSwitch2">
+          <span class="slider"></span>
+          <span id="pinState2">OFF</span>
+      </label>
+      <label class="switch" id="D1">
+          <input type="checkbox" id="toggleSwitch1">
+          <span class="slider"></span>
+          <span id="pinState1">OFF</span>
+      </label>
+      <label class="switch" id="D0">
+          <input type="checkbox" id="toggleSwitch0">
+          <span class="slider"></span>
+          <span id="pinState0">OFF</span>
+      </label>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/particle-api-js@8/dist/particle.min.js"></script>
+<script  src="https://use.fontawesome.com/releases/v5.15.2/js/all.js"   data-auto-a11y="true"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+  var particle = new Particle();
+  var token;
+  particle.login({username: 'user@gmail.com', password: 'password'}).then(
+    function(data) {
+       token = data.body.access_token;
+    },
+    function (err) {
+      console.log('Could not log in.', err);
+    }
+  );
+
+  let cooldownTag = document.getElementById('cooldown');
+  function createCooldownFunction(action, revertAction, cooldownTime) {
+    let isOnCooldown = false;
+
+    return function() {
+      if (isOnCooldown) {
+        return;
+      }
+
+      if (action) action.apply(this, arguments);
+
+      isOnCooldown = true;
+      cooldownTag.innerHTML = "ON";
+
+      setTimeout(() => {
+        if (revertAction) revertAction.apply(this, arguments);
+        isOnCooldown = false;
+        cooldownTag.innerHTML = "OFF";
+      }, cooldownTime);
+    };
+  }
+
+  const setPinState = createCooldownFunction((pin, event) => {
+    event.target.disabled = true;
+    var output = document.getElementById(`pinState${pin}`);
+    var value = event.target.checked;
+    output.innerHTML = value ? 'ON' : 'OFF';
+
+    var salida = value ? 'on' : 'off';
+    console.log("trigger:", pin, salida);
+
+    particle.callFunction({
+      deviceId: 'device_id_1234567890',
+      name: 'pin',
+      argument: `${pin}`,
+      auth: token,
+    });
+
+    particle.callFunction({
+      deviceId: 'device_id_1234567890',
+      name: 'state',
+      argument: salida,
+      auth: token,
+    });
+  }, (pin, event) => {
+    event.target.disabled = false;
+  }, 2000);
+
+  var d0 = document.getElementById('toggleSwitch0');
+  var d1 = document.getElementById('toggleSwitch1');
+  var d2 = document.getElementById('toggleSwitch2');
+  var d3 = document.getElementById('toggleSwitch3');
+  var d4 = document.getElementById('toggleSwitch4');
+  var d5 = document.getElementById('toggleSwitch5');
+  var d6 = document.getElementById('toggleSwitch6');
+  var d7 = document.getElementById('toggleSwitch7');
+
+  d0.oninput = (event) => setPinState('0', event);
+  d1.oninput = (event) => setPinState('1', event);
+  d2.oninput = (event) => setPinState('2', event);
+  d3.oninput = (event) => setPinState('3', event);
+  d4.oninput = (event) => setPinState('4', event);
+  d5.oninput = (event) => setPinState('5', event);
+  d6.oninput = (event) => setPinState('6', event);
+  d7.oninput = (event) => setPinState('7', event);
+</script>
+</body>
+</html>
+

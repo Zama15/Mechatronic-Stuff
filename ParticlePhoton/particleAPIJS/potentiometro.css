@@ -1,0 +1,173 @@
+body {
+  display: flex;
+  justify-content: center;
+  color: #fff;
+  user-select: none;
+  touch-action: none;
+}
+form {
+    margin: 0 0 1em 0;
+}
+form:last-of-type {
+    margin-bottom: 0;
+}
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.knob-group {
+  zoom: 2.5;
+  background-color: #2c2d2f;
+  padding: 0 0.5em;
+  border-radius: 0.2rem;
+  height: fit-content;
+}
+.knob {
+  --knob-deg: 0;
+  display: inline-block;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  width: 4em;
+  border: 0;
+  text-align: center;
+  touch-action: none;
+  font-size: 1rem;
+}
+.knob.knob-balance hr, .knob.knob-balance i {
+  position: absolute;
+  top: 5.1538461538em;
+  left: 0;
+  width: 100%;
+  border: 0;
+  font-size: 0.65em;
+  font-style: normal;
+  line-height: 2.5;
+  color: #888;
+}
+.knob.knob-balance hr::before, .knob.knob-balance hr::after, .knob.knob-balance i::before, .knob.knob-balance i::after {
+  position: absolute;
+}
+.knob.knob-balance hr::before, .knob.knob-balance i::before {
+  content: attr(data-min);
+  left: 0;
+}
+.knob.knob-balance hr::after, .knob.knob-balance i::after {
+  content: attr(data-max);
+  right: 0;
+}
+.knob.knob-balance svg path:last-of-type {
+  stroke-dashoffset: 0;
+}
+.knob input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  position: relative;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 5.3333333333em;
+  height: 1.5em;
+  font: inherit;
+  font-size: 0.75em;
+  line-height: 1em;
+  color: currentColor;
+  text-align: center;
+  font-variant-numeric: tabular-nums lining-nums;
+  background-color: transparent;
+  border: 0;
+  margin: 5.8333333333em 0 0 0;
+  padding: 0 !important;
+  outline: 0;
+  cursor: default;
+  z-index: 2;
+  caret-color: currentColor;
+}
+.knob input:hover {
+  border-bottom: 1px solid #aaa;
+}
+.knob input:placeholder {
+  opacity: 1;
+  color: currentColor;
+}
+.knob input::-webkit-outer-spin-button, .knob input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.knob input:focus_ {
+  color: currentColor;
+  background-color: magenta;
+}
+.knob input::selection {
+  color: currentColor;
+  background-color: rgba(255, 0, 255, 0);
+}
+.knob input[disabled], .knob input[readonly] {
+  cursor: not-allowed;
+}
+.knob input[disabled] ~ *, .knob input[disabled] ~ *::before, .knob input[disabled] ~ *::after, .knob input[readonly] ~ *, .knob input[readonly] ~ *::before, .knob input[readonly] ~ *::after {
+  pointer-events: none;
+}
+.knob input[disabled]::selection, .knob input[readonly]::selection {
+  background-color: transparent;
+}
+.knob label {
+  font-weight: bold;
+  color: #ccc;
+}
+.knob label::before, .knob label::after {
+  position: absolute;
+  display: inline-block;
+}
+.knob label::before {
+  content: "";
+  left: 50%;
+  top: 0.5em;
+  width: 3.5em;
+  height: 3.5em;
+  border: 0.5em solid #181b1c;
+  border-radius: 100%;
+  background-color: transparent;
+  background: linear-gradient(to bottom, currentColor 0% 100%) no-repeat 50% 0%;
+  background-size: 0.2em 1em;
+  transform-origin: center center;
+  transform: translateX(-50%) rotate(0deg);
+  transform: translateX(-50%) rotate(calc(1deg * var(--knob-deg)));
+  cursor: default;
+  pointer-events: fill;
+  color: #fff;
+}
+.knob label::after {
+  content: attr(data-unit);
+  top: 5.0538461538em;
+  right: 0;
+  font-size: 0.65em;
+  line-height: 2.5;
+  color: #888;
+}
+.knob svg {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 4.5em;
+  height: 4.5em;
+  transform: translateX(-50%);
+  stroke-dasharray: 184 184;
+  fill: none;
+  stroke: currentColor;
+  z-index: 3;
+}
+.knob svg path {
+  stroke-width: 5;
+  stroke-dashoffset: 0;
+  visibility: visible;
+  pointer-events: stroke;
+  transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
+}
+.knob svg path:first-of-type {
+  stroke: magenta;
+}
+.knob svg path:last-of-type {
+  stroke: #888;
+  stroke-dashoffset: -97;
+}
