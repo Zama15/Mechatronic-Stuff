@@ -1,0 +1,22 @@
+{
+    "name": "Twilio llamadas",
+    "event": "twilioVoice",
+    "disabled": false,
+    "template": "webhook",
+    "url": "https://api.twilio.com/2010-04-01/Accounts/<TWILIO_ACCOUNT_SID>/Calls.json",
+    "requestType": "POST",
+    "noDefaults": true,
+    "rejectUnauthorized": true,
+    "unchunked": false,
+    "data_url_response_event": false,
+    "form": {
+        "From": "<TWILIO_PHONE_NUMBER>",
+        "To": "{{to}}",
+        "Twiml": "{{twiml}}"
+    },
+    "auth": {
+        "username": "<TWILIO_ACCOUNT_SID>",
+        "password": "<TWILIO_AUTH_TOKEN>"
+    }
+}
+
